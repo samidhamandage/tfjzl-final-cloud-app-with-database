@@ -86,38 +86,35 @@ class Enrollment(models.Model):
 
 class Question(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    content = models.CharField(max_length=200)
-    grade = models.IntegerField(default=50)
+    text = models.CharField(max_length=200, default="Question")
+    grade = models.FloatField(default=0)
 
     def __str__(self):
-        return self.content
+        return self.text
 
     def is_get_score(self, selected_ids):
-        correct_answers = self.choice_set.filter(is_correct=True).count()
-        selected_correct = self.choice_set.filter(
-            is_correct=True,
-            id__in=selected_ids
-        ).count()
-        selected_incorrect = self.choice_set.filter(
-            is_correct=False,
-            id__in=selected_ids
-        ).count()
+        selected_ids = {int(item) for item in selected_ids}
 
-        return correct_answers == selected_correct and selected_incorrect == 0
+        correct_ids = set(
+            self.choice_set.filter(is_correct=True).values_list('id', flat=True)
+        )
+
+        return bool(correct_ids) and selected_ids == correct_ids
 
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    content = models.CharField(max_length=200)
+    text = models.CharField(max_length=200, default="Choice")
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.content
+        return self.text
 
 
 class Submission(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.id)
+        return f"Submission #{self.pk} by {self.enrollment.user.username}"

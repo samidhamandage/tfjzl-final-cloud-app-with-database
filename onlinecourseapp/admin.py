@@ -2,13 +2,17 @@ from django.contrib import admin
 from .models import (
     Course,
     Lesson,
-    Enrollment,
     Instructor,
     Learner,
     Question,
     Choice,
     Submission
 )
+
+
+class ChoiceInline(admin.TabularInline):
+    model = Choice
+    extra = 2
 
 
 class QuestionInline(admin.TabularInline):
@@ -21,11 +25,6 @@ class LessonInline(admin.TabularInline):
     extra = 1
 
 
-class ChoiceInline(admin.TabularInline):
-    model = Choice
-    extra = 2
-
-
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'pub_date', 'total_enrollment')
@@ -34,7 +33,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('content', 'course', 'grade')
+    list_display = ('text', 'course', 'grade')
     inlines = [ChoiceInline]
 
 
@@ -46,5 +45,5 @@ class LessonAdmin(admin.ModelAdmin):
 
 admin.site.register(Instructor)
 admin.site.register(Learner)
-admin.site.register(Enrollment)
+admin.site.register(Choice)
 admin.site.register(Submission)
